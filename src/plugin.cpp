@@ -109,23 +109,6 @@ void ts3plugin_setFunctionPointers(const struct TS3Functions funcs) {
  * If the function returns 1 on failure, the plugin will be unloaded again.
  */
 int ts3plugin_init() {
-    char appPath[PATH_BUFSIZE];
-    char resourcesPath[PATH_BUFSIZE];
-    char configPath[PATH_BUFSIZE];
-	char pluginPath[PATH_BUFSIZE];
-
-    /* Your plugin init code here */
-    printf("PLUGIN: init\n");
-
-    /* Example on how to query application, resources and configuration paths from client */
-    /* Note: Console client returns empty string for app and resources path */
-    ts3Functions.getAppPath(appPath, PATH_BUFSIZE);
-    ts3Functions.getResourcesPath(resourcesPath, PATH_BUFSIZE);
-    ts3Functions.getConfigPath(configPath, PATH_BUFSIZE);
-	ts3Functions.getPluginPath(pluginPath, PATH_BUFSIZE);
-
-	printf("PLUGIN: App path: %s\nResources path: %s\nConfig path: %s\nPlugin path: %s\n", appPath, resourcesPath, configPath, pluginPath);
-
     return 0;  /* 0 = success, 1 = failure, -2 = failure but client will not show a "failed to load" warning */
 	/* -2 is a very special case and should only be used if a plugin displays a dialog (e.g. overlay) asking the user to disable
 	 * the plugin again, avoiding the show another dialog by the client telling the user the plugin failed to load.
@@ -135,7 +118,7 @@ int ts3plugin_init() {
 /* Custom code called right before the plugin is unloaded */
 void ts3plugin_shutdown() {
     /* Your plugin cleanup code here */
-    printf("PLUGIN: shutdown\n");
+
 
 	/*
 	 * Note:
@@ -157,7 +140,7 @@ void ts3plugin_shutdown() {
 
 /* Tell client if plugin offers a configuration window. If this function is not implemented, it's an assumed "does not offer" (PLUGIN_OFFERS_NO_CONFIGURE). */
 int ts3plugin_offersConfigure() {
-	printf("PLUGIN: offersConfigure\n");
+
 	/*
 	 * Return values:
 	 * PLUGIN_OFFERS_NO_CONFIGURE         - Plugin does not implement ts3plugin_configure
@@ -169,7 +152,6 @@ int ts3plugin_offersConfigure() {
 
 /* Plugin might offer a configuration window. If ts3plugin_offersConfigure returns 0, this function does not need to be implemented. */
 void ts3plugin_configure(void* handle, void* qParentWidget) {
-    printf("PLUGIN: configure\n");
 }
 
 /*
@@ -181,7 +163,6 @@ void ts3plugin_registerPluginID(const char* id) {
 	const size_t sz = strlen(id) + 1;
 	pluginID = (char*)malloc(sz * sizeof(char));
 	_strcpy(pluginID, sz, id);  /* The id buffer will invalidate after exiting this function */
-	printf("PLUGIN: registerPluginID: %s\n", pluginID);
 }
 
 
@@ -216,17 +197,13 @@ char* std_channelname;
 void channelcreator(uint64 serverConnectionHandlerID,  char* channelname, char* channelpw = "",int talkpower = 22) {
 
 	bool istChannelNameFrei = false;
-	char wantedChannelName[TS3_MAX_CHANNEL_NAME] = "";
+	char wantedChannelName[TS3_MAX_SIZE_CHANNEL_NAME] = "";
 	strcat(wantedChannelName, channelname);
 	
-
 	int suffix = 1;
 	while (!IstChannelNameFrei(serverConnectionHandlerID, wantedChannelName)) {
-		//printf("test");
 		char strSuffix[100] = "";
 		sprintf(strSuffix, "%d", suffix);
-		// alten Namen speichern
-		//sprintf(newChannelName, "%s", wantedChannelName);
 		strcat(wantedChannelName, strSuffix);
 		suffix++;
 	}
@@ -243,6 +220,7 @@ void channelcreator(uint64 serverConnectionHandlerID,  char* channelname, char* 
 		ts3Functions.setChannelVariableAsString(serverConnectionHandlerID, 0, CHANNEL_PASSWORD, channelpw);
 	}
 	ts3Functions.setChannelVariableAsInt(serverConnectionHandlerID, 0, CHANNEL_CODEC_QUALITY, std_codec_quality);
+	//ts3Functions.setChannelVariableAsInt(serverConnectionHandlerID, 0, CHANNEL_FLAG_MAXCLIENTS_UNLIMITED, 0);
 	//ts3Functions.setChannelVariableAsInt(serverConnectionHandlerID, 0, CHANNEL_MAXCLIENTS, std_channel_max_clients);
 	ts3Functions.flushChannelCreation(serverConnectionHandlerID, 0,NULL);
 
@@ -449,18 +427,13 @@ void ts3plugin_initHotkeys(struct PluginHotkey*** hotkeys) {
 
 /* Clientlib */
 
-
-
-
-void ts3plugin_onConnectStatusChangeEvent(uint64 serverConnectionHandlerID, int newStatus, unsigned int errorNumber) {
-    
+void ts3plugin_onConnectStatusChangeEvent(uint64 serverConnectionHandlerID, int newStatus, unsigned int errorNumber) { 
 }
 
 void ts3plugin_onNewChannelEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 channelParentID) {
 }
 
 void ts3plugin_onNewChannelCreatedEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 channelParentID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
-	
 }
 
 void ts3plugin_onDelChannelEvent(uint64 serverConnectionHandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
@@ -471,8 +444,6 @@ void ts3plugin_onChannelMoveEvent(uint64 serverConnectionHandlerID, uint64 chann
 
 void ts3plugin_onUpdateChannelEvent(uint64 serverConnectionHandlerID, uint64 channelID) {
 }
-
-
 
 void ts3plugin_onUpdateChannelEditedEvent(uint64 serverConnectionHandlerID, uint64 channelID, anyID invokerID, const char* invokerName, const char* invokerUniqueIdentifier) {
 
@@ -505,7 +476,6 @@ void ts3plugin_onUpdateChannelEditedEvent(uint64 serverConnectionHandlerID, uint
 		editor2 = invokerID;
 
 	editor1 = invokerID;
-
 	
 	//ts3Functions.setChannelVariableAsString(serverConnectionHandlerID, mychannelID, CHANNEL_NAME, std_channelname);
 	ts3Functions.setChannelVariableAsInt(serverConnectionHandlerID, mychannelID, CHANNEL_NEEDED_TALK_POWER, std_talkpower);
